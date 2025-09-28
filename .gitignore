@@ -1,0 +1,19 @@
+# Ignore build directories
+build/
+**/build/
+
+# Ignore compiled binaries
+*.exe
+*.out
+
+# Ignore CMake files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# Ignore Qt generated files
+*_autogen/
+moc_*
+qrc_*
+ui_*
