@@ -17,3 +17,7 @@ Makefile
 moc_*
 qrc_*
 ui_*
+
+# datasets
+ch8/data/data/
+/ch8/rgbd_dataset_freiburg3_sitting_static

@@ -42,11 +42,11 @@ int main ( int argc, char** argv )
     find_feature_matches ( img_1, img_2, keypoints_1, keypoints_2, matches );
     cout<<"一共找到了"<<matches.size() <<"组匹配点"<<endl;
 
-    return 0;
-
     //-- 估计两张图像间运动
     Mat R,t;
     pose_estimation_2d2d ( keypoints_1, keypoints_2, matches, R, t );
+
+    // return 0;
 
     //-- 验证E=t^R*scale
     Mat t_x = ( Mat_<double> ( 3,3 ) <<
