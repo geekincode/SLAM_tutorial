@@ -21,9 +21,14 @@
 #define CONFIG_H
 
 #include "myslam/common_include.h" 
+#include <opencv2/opencv.hpp>
 
 namespace myslam 
 {
+
+// 工具函数：兼容性地读取YAML文件
+bool readFileStorage(const std::string& filepath, cv::FileStorage& fs);
+
 class Config
 {
 private:

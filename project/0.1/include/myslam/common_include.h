@@ -30,7 +30,11 @@ using Eigen::Vector3d;
 
 // for Sophus
 #include <sophus/se3.hpp>
-using Sophus::SE3;
+#include <sophus/so3.hpp>
+
+// 为Sophus类型定义别名，指定模板参数
+using SE3d = Sophus::SE3<double>;
+using SO3d = Sophus::SO3<double>;
 
 // for cv
 #include <opencv2/core/core.hpp>
