@@ -18,19 +18,46 @@
  */
 
 #include "myslam/config.h"
+#include <fstream>
+#include <sstream>
 
 namespace myslam 
 {
+    
+bool readFileStorage(const std::string& filepath, cv::FileStorage& fs) {
+    std::ifstream file(filepath);
+    if (!file.is_open()) {
+        std::cerr << "Cannot open file: " << filepath << std::endl;
+        return false;
+    }
+
+    std::stringstream buffer;
+    std::string line;
+
+    // 检查第一行是否为 %YAML:1.0
+    std::getline(file, line);
+    if (line.find("%YAML:") != 0) {
+        buffer << "%YAML:1.0\n";  // 注入标准头部
+    }
+    buffer << line << "\n";
+
+    // 写入剩余内容
+    buffer << file.rdbuf();
+    file.close();
+
+    // 从字符串流打开 FileStorage
+    fs.open(buffer.str(), cv::FileStorage::READ | cv::FileStorage::MEMORY);
+    return fs.isOpened();
+}
     
 void Config::setParameterFile( const std::string& filename )
 {
     if ( config_ == nullptr )
         config_ = shared_ptr<Config>(new Config);
-    config_->file_ = cv::FileStorage( filename.c_str(), cv::FileStorage::READ );
-    if ( config_->file_.isOpened() == false )
-    {
-        std::cerr<<"parameter file "<<filename<<" does not exist."<<std::endl;
-        config_->file_.release();
+    
+    // 使用兼容性函数读取YAML文件
+    if (!readFileStorage(filename, config_->file_)) {
+        std::cerr << "parameter file " << filename << " does not exist or cannot be opened." << std::endl;
         return;
     }
 }
