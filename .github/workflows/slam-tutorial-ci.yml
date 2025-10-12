@@ -1,0 +1,66 @@
+name: SLAM Tutorial CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-22.04
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Cache Docker layers
+      uses: actions/cache@v3
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-buildx-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-buildx-
+          
+    - name: Build Docker image
+      run: |
+        docker build -t slam-tutorial .
+    
+    - name: Verify basic dependencies
+      run: |
+        echo "Checking installed packages..."
+        docker run --rm slam-tutorial dpkg -l | grep -E "(eigen3|ceres|opencv|sophus|g2o)"
+        
+    - name: Test Chapter 2 examples
+      run: |
+        docker run --rm slam-tutorial bash -c "cd /home/slam_tutorial/ch2 && ls -la"
+        
+    - name: Test Chapter 3 examples
+      run: |
+        docker run --rm slam-tutorial bash -c "cd /home/slam_tutorial/ch3/useEigen && ls -la"
+        docker run --rm slam-tutorial bash -c "cd /home/slam_tutorial/ch3/useGeometry && ls -la"
+        
+    - name: Test Chapter 4 examples
+      run: |
+        docker run --rm slam-tutorial bash -c "cd /home/slam_tutorial/ch4/useSophus && ls -la"
+        
+    - name: Test Chapter 5 examples
+      run: |
+        docker run --rm slam-tutorial bash -c "cd /home/slam_tutorial/ch5/joinMap && ls -la"
+        
+    - name: Test Chapter 6 examples
+      run: |
+        docker run --rm slam-tutorial bash -c "cd /home/slam_tutorial/ch6/ceres_curve_fitting && ls -la"
+        docker run --rm slam-tutorial bash -c "cd /home/slam_tutorial/ch6/g2o_curve_fitting && ls -la"
+        
+    - name: Test Chapter 7 examples
+      run: |
+        docker run --rm slam-tutorial bash -c "cd /home/slam_tutorial/ch7 && ls -la"
+        
+    - name: Test compilation of selected chapters
+      run: |
+        # 测试能否成功编译部分示例代码
+        docker run --rm slam-tutorial bash -c "cd /home/slam_tutorial/ch2 && g++ -std=c++17 helloSLAM.cpp -o helloSLAM && ./helloSLAM"

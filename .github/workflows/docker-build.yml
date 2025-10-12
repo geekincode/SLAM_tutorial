@@ -1,0 +1,38 @@
+name: Docker Build and Test
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Build Docker image
+      run: |
+        docker build -t slam-tutorial .
+    
+    - name: Test Docker image
+      run: |
+        # 运行一个简单的测试以确保镜像可以正确构建和运行
+        docker run --rm slam-tutorial echo "Docker image built successfully"
+        
+        # 检查是否安装了必要的依赖
+        docker run --rm slam-tutorial which g++
+        docker run --rm slam-tutorial which cmake
+        docker run --rm slam-tutorial dpkg -l | grep libeigen3-dev
+        docker run --rm slam-tutorial dpkg -l | grep libceres-dev
+        docker run --rm slam-tutorial dpkg -l | grep libopencv-dev
+        
+        # 检查Sophus和g2o是否正确安装
+        docker run --rm slam-tutorial ls /usr/local/include/sophus
+        docker run --rm slam-tutorial ls /usr/local/include/g2o
