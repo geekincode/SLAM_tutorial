@@ -68,6 +68,7 @@ RUN cd /home && \
     # 修改CMakeLists.txt中的最低版本要求
     sed -i 's/cmake_minimum_required(VERSION [0-9.]\+)/cmake_minimum_required(VERSION 3.16)/' Sophus/CMakeLists.txt && \
     cd Sophus && \
+    export DEBIAN_FRONTEND=noninteractive && \
     bash scripts/install_ubuntu_deps_incl_ceres.sh && \
     mkdir build && \
     cd build && \
