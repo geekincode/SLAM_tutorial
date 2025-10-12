@@ -63,7 +63,7 @@ RUN echo "set encoding=utf-8" >> ~/.vimrc \
 RUN cd /home && \
     git clone https://github.com/strasdat/Sophus.git && \
     # 仅docker需要去掉sudo
-    sed -i 's/sudo //g' Sophus/scripts/install_ubuntu_deps_incl_ceres.sh \
+    sed -i 's/sudo //g' Sophus/scripts/install_ubuntu_deps_incl_ceres.sh && \
     sed -i 's|https://ceres-solver.googlesource.com/ceres-solver|https://github.com/ceres-solver/ceres-solver.git|g' Sophus/scripts/install_ubuntu_deps_incl_ceres.sh && \
     # 修改CMakeLists.txt中的最低版本要求
     sed -i 's/cmake_minimum_required(VERSION [0-9.]\+)/cmake_minimum_required(VERSION 3.16)/' Sophus/CMakeLists.txt && \
