@@ -1,0 +1,31 @@
+# Ignore build directories
+build/
+**/build/
+
+# Ignore compiled binaries
+**/bin/**
+*.out
+
+# Ignore CMake files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# Ignore Qt generated files
+*_autogen/
+moc_*
+qrc_*
+ui_*
+
+# datasets
+ch8/data/data/
+/ch8/rgbd_dataset_freiburg3_sitting_static
+project/datasets/**
+!project/datasets/config/
+!project/datasets/config/**
+
+# git
+.git
+.gitignore
+.gitmodules
