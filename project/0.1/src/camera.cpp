@@ -27,13 +27,16 @@ Camera::Camera()
 {
 }
 
+
 Vector3d Camera::world2camera ( const Vector3d& p_w, const SE3d& T_c_w )
 {
+    // T_c_w 是从世界坐标系到相机坐标系的变换矩阵（SE3 类型）
     return T_c_w*p_w;
 }
 
 Vector3d Camera::camera2world ( const Vector3d& p_c, const SE3d& T_c_w )
 {
+    // 使用 T_c_w 的逆矩阵实现反向变换
     return T_c_w.inverse() *p_c;
 }
 
