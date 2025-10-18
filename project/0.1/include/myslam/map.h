@@ -30,6 +30,8 @@ class Map
 {
 public:
     typedef shared_ptr<Map> Ptr;
+    // unordered_map 是 C++11 引入的标准库关联容器，基于哈希表实现
+    // 用于存储键值对(key-value pairs)，每个键(key)唯一对应一个值(value)
     unordered_map<unsigned long, MapPoint::Ptr >  map_points_;        // all landmarks
     unordered_map<unsigned long, Frame::Ptr >     keyframes_;         // all key-frames
 

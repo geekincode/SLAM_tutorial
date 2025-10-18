@@ -49,6 +49,7 @@ Frame::Ptr Frame::createFrame()
 
 double Frame::findDepth ( const cv::KeyPoint& kp )
 {
+    // cvRound：将浮点坐标四舍五入为整数像素坐标
     int x = cvRound(kp.pt.x);
     int y = cvRound(kp.pt.y);
     ushort d = depth_.ptr<ushort>(y)[x];
@@ -58,6 +59,9 @@ double Frame::findDepth ( const cv::KeyPoint& kp )
     }
     else 
     {
+        // 邻域定义：
+        // dx/dy数组定义了4-连通邻域
+        // 循环顺序：(-1,0)→(0,-1)→(1,0)→(0,1)
         // check the nearby points 
         int dx[4] = {-1,0,1,0};
         int dy[4] = {0,-1,0,1};
@@ -66,6 +70,7 @@ double Frame::findDepth ( const cv::KeyPoint& kp )
             d = depth_.ptr<ushort>( y+dy[i] )[x+dx[i]];
             if ( d!=0 )
             {
+                // 将传感器原始深度值转换为实际距离
                 return double(d)/camera_->depth_scale_;
             }
         }
@@ -75,17 +80,27 @@ double Frame::findDepth ( const cv::KeyPoint& kp )
 
 Vector3d Frame::getCamCenter() const
 {
+    // translation() 是 Eigen/Sophus 库中表示刚体变换（如 SE3）的一个成员方法
+    // 它返回变换矩阵中的平移分量，即一个 3D 向量（Eigen::Vector3d 类型）
+    // 代表坐标系原点在目标坐标系中的位置
     return T_c_w_.inverse().translation();
 }
 
 bool Frame::isInFrame ( const Vector3d& pt_world )
 {
+    // 将世界坐标点转换到当前帧的相机坐标系
     Vector3d p_cam = camera_->world2camera( pt_world, T_c_w_ );
     // cout<<"P_cam = "<<p_cam.transpose()<<endl;
+    
+    // 检查点是否位于相机后方（深度值小于0）
     if ( p_cam(2,0)<0 ) 
         return false;
+    
+    // 将相机坐标系点投影到像素坐标系
     Vector2d pixel = camera_->camera2pixel( p_cam );
     // cout<<"P_pixel = "<<pixel.transpose()<<endl<<endl;
+    
+    // 验证像素坐标是否在图像有效范围内
     return pixel(0,0)>0 && 
            pixel(1,0)>0 &&
            pixel(0,0)<color_.cols && 

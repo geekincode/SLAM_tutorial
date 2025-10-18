@@ -33,7 +33,7 @@ class Frame
 public:
     typedef std::shared_ptr<Frame> Ptr;
     unsigned long                  id_;         // id of this frame
-    double                         time_stamp_; // when it is recorded
+    double                         time_stamp_; // when it is recorded 时间戳
     SE3d                           T_c_w_;      // transform from world to camera
     Camera::Ptr                    camera_;     // Pinhole RGBD Camera model 
     Mat                            color_, depth_; // color and depth image 
