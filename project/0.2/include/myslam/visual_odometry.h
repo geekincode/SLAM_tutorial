@@ -32,9 +32,9 @@ class VisualOdometry
 public:
     typedef shared_ptr<VisualOdometry> Ptr;
     enum VOState {
-        INITIALIZING=-1,
-        OK=0,
-        LOST
+        INITIALIZING=-1,        // 初始化
+        OK=0,                   // 正常
+        LOST                    // 丢失
     };
     
     VOState     state_;     // current VO status
