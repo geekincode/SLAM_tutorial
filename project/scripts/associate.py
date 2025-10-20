@@ -124,7 +124,7 @@ if __name__ == '__main__':
     parser.add_argument('--offset', help='time offset added to the timestamps of the second file (default: 0.0)',default=0.0)
     parser.add_argument('--max_difference', help='maximally allowed time difference for matching entries (default: 0.02)',default=0.02)
     parser.add_argument('--filter_duplicates', help='filter out consecutive entries with identical timestamps (default: disabled)', action='store_true')
-    parser.add_argument('--output_file', help='output file name (default: associate.txt)', default='associate.txt')
+    parser.add_argument('--output_file', help='output file name (default: associated.txt)', default='associated.txt')
     
     args = parser.parse_args()
 
