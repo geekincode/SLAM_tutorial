@@ -11,6 +11,7 @@
 #include <cmath>
 #include <memory>
 #include <chrono>
+#include <fstream>
 using namespace std; 
 
 /**
@@ -70,6 +71,28 @@ public:
      */
     virtual bool write( ostream& out ) const override { return false; }
 };
+
+/**
+ * @brief 保存数据到文件，供可视化程序使用
+ * 
+ * @param filename 保存的文件名
+ * @param x_data x坐标数据
+ * @param y_data y坐标数据
+ */
+void saveDataToFile(const string& filename, const vector<double>& x_data, const vector<double>& y_data) {
+    ofstream file(filename);
+    if (!file.is_open()) {
+        cerr << "Failed to open file for writing: " << filename << endl;
+        return;
+    }
+    
+    for (size_t i = 0; i < x_data.size(); ++i) {
+        file << x_data[i] << " " << y_data[i] << endl;
+    }
+    
+    file.close();
+    cout << "Data saved to " << filename << endl;
+}
 
 /**
  * @brief 曲线拟合边类
@@ -149,7 +172,7 @@ int main( int argc, char** argv )
 {
     double a=1.0, b=2.0, c=1.0;         // 预设参数值，是我们待优化的参数
     int N=100;                          // 数据点
-    double w_sigma=1.0;                 // 噪声Sigma值
+    double w_sigma=2.0;                 // 噪声Sigma值
     cv::RNG rng;                        // OpenCV随机数产生器
     double abc[3] = {0,0,0};            // abc参数的估计值
 
@@ -166,6 +189,9 @@ int main( int argc, char** argv )
         );
         cout<<x_data[i]<<" "<<y_data[i]<<endl;
     }
+    
+    // 保存数据到文件，供后续可视化使用
+    saveDataToFile("./data/data.txt", x_data, y_data);
     
     // 构建图优化，先设定g2o
     // 定义块求解器类型，参数为<误差项优化变量维度，误差值维度>
@@ -215,6 +241,16 @@ int main( int argc, char** argv )
     // 输出优化值
     Eigen::Vector3d abc_estimate = v->estimate();                       // 获取优化后的参数估计值
     cout<<"estimated model: "<<abc_estimate.transpose()<<endl;
+    
+    // 保存优化结果到文件
+    ofstream resultFile("./data/result.txt");
+    if (resultFile.is_open()) {
+        resultFile << "a: " << abc_estimate[0] << endl;
+        resultFile << "b: " << abc_estimate[1] << endl;
+        resultFile << "c: " << abc_estimate[2] << endl;
+        resultFile.close();
+        cout << "Results saved to result.txt" << endl;
+    }
     
     return 0;
 }
