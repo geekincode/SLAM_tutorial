@@ -8,11 +8,29 @@ namespace myslam
  */
 void EdgeProjectXYZRGBD::computeError()
 {
+    // _vertices
+    // 定义位置：g2o库中g2o::BaseBinaryEdge类的成员变量
+    // 数据类型：std::vector<g2o::HyperGraph::Vertex*>（顶点指针的向量）
+    // 作用：存储与当前边连接的所有顶点
+    // 在EdgeProjectXYZRGBD中的具体含义：
+    // _vertices[0]：指向g2o::VertexPointXYZ类型的指针，表示3D空间点顶点
+    // _vertices[1]：指向g2o::VertexSE3Expmap类型的指针，表示相机位姿顶点（SE(3)李群）
+
     // 获取顶点：3D点和位姿
     const g2o::VertexPointXYZ* point = static_cast<const g2o::VertexPointXYZ*> ( _vertices[0] );
     const g2o::VertexSE3Expmap* pose = static_cast<const g2o::VertexSE3Expmap*> ( _vertices[1] );
     // 计算误差：测量值 - 变换后的3D点坐标
     _error = _measurement - pose->estimate().map ( point->estimate() );
+
+    // _measurement
+    // 定义位置：g2o库中g2o::BaseBinaryEdge类的成员变量
+    // 数据类型：根据具体边类型而定，在EdgeProjectXYZRGBD中为Eigen::Vector3d
+    // 作用：存储该边表示的实际观测值
+    // 在EdgeProjectXYZRGBD中的具体含义：
+    // 表示从RGB-D相机实际测量到的3D点坐标
+    // 在误差计算中：_error = _measurement - pose->estimate().map(point->estimate())
+    // 即：实际观测值 - 根据当前位姿估计值投影得到的预测值
+    // 关键点：_measurement是优化过程中的"真值"参考，优化目标是最小化预测值与测量值之间的差异
 }
 
 /**
@@ -45,28 +63,33 @@ void EdgeProjectXYZRGBD::linearizeOplus()
     _jacobianOplusXi(2,2) = -1;
 
     // 设置相对于位姿的雅可比矩阵(3x6矩阵)
-    // 对旋转部分的导数（平移部分为0）
-    _jacobianOplusXj ( 0,0 ) = 0;
-    _jacobianOplusXj ( 0,1 ) = -z;
-    _jacobianOplusXj ( 0,2 ) = y;
-    // 对平移部分的导数（旋转部分为-I）
-    _jacobianOplusXj ( 0,3 ) = -1;
-    _jacobianOplusXj ( 0,4 ) = 0;
-    _jacobianOplusXj ( 0,5 ) = 0;
+    // 使用Eigen逗号初始化一次性设置整个矩阵
+    _jacobianOplusXj << 
+        0, -z,  y, -1,  0,  0,
+        z,  0, -x,  0, -1,  0,
+       -y,  x,  0,  0,  0, -1;
+    // // 对旋转部分的导数（平移部分为0）
+    // _jacobianOplusXj ( 0,0 ) = 0;
+    // _jacobianOplusXj ( 0,1 ) = -z;
+    // _jacobianOplusXj ( 0,2 ) = y;
+    // // 对平移部分的导数（旋转部分为-I）
+    // _jacobianOplusXj ( 0,3 ) = -1;
+    // _jacobianOplusXj ( 0,4 ) = 0;
+    // _jacobianOplusXj ( 0,5 ) = 0;
 
-    _jacobianOplusXj ( 1,0 ) = z;
-    _jacobianOplusXj ( 1,1 ) = 0;
-    _jacobianOplusXj ( 1,2 ) = -x;
-    _jacobianOplusXj ( 1,3 ) = 0;
-    _jacobianOplusXj ( 1,4 ) = -1;
-    _jacobianOplusXj ( 1,5 ) = 0;
+    // _jacobianOplusXj ( 1,0 ) = z;
+    // _jacobianOplusXj ( 1,1 ) = 0;
+    // _jacobianOplusXj ( 1,2 ) = -x;
+    // _jacobianOplusXj ( 1,3 ) = 0;
+    // _jacobianOplusXj ( 1,4 ) = -1;
+    // _jacobianOplusXj ( 1,5 ) = 0;
 
-    _jacobianOplusXj ( 2,0 ) = -y;
-    _jacobianOplusXj ( 2,1 ) = x;
-    _jacobianOplusXj ( 2,2 ) = 0;
-    _jacobianOplusXj ( 2,3 ) = 0;
-    _jacobianOplusXj ( 2,4 ) = 0;
-    _jacobianOplusXj ( 2,5 ) = -1;
+    // _jacobianOplusXj ( 2,0 ) = -y;
+    // _jacobianOplusXj ( 2,1 ) = x;
+    // _jacobianOplusXj ( 2,2 ) = 0;
+    // _jacobianOplusXj ( 2,3 ) = 0;
+    // _jacobianOplusXj ( 2,4 ) = 0;
+    // _jacobianOplusXj ( 2,5 ) = -1;
 }
 
 /**
@@ -97,28 +120,33 @@ void EdgeProjectXYZRGBDPoseOnly::linearizeOplus()
     double z = xyz_trans[2];
 
     // 设置雅可比矩阵(3x6)，仅相对于位姿
-    // 对旋转部分的导数
-    _jacobianOplusXi ( 0,0 ) = 0;
-    _jacobianOplusXi ( 0,1 ) = -z;
-    _jacobianOplusXi ( 0,2 ) = y;
-    // 对平移部分的导数
-    _jacobianOplusXi ( 0,3 ) = -1;
-    _jacobianOplusXi ( 0,4 ) = 0;
-    _jacobianOplusXi ( 0,5 ) = 0;
+    _jacobianOplusXi <<
+        0, -z, y, -1, 0, 0,
+        z, 0, -x, 0, -1, 0,
+        -y, x, 0, 0, 0, -1;
 
-    _jacobianOplusXi ( 1,0 ) = z;
-    _jacobianOplusXi ( 1,1 ) = 0;
-    _jacobianOplusXi ( 1,2 ) = -x;
-    _jacobianOplusXi ( 1,3 ) = 0;
-    _jacobianOplusXi ( 1,4 ) = -1;
-    _jacobianOplusXi ( 1,5 ) = 0;
+    // // 对旋转部分的导数
+    // _jacobianOplusXi ( 0,0 ) = 0;
+    // _jacobianOplusXi ( 0,1 ) = -z;
+    // _jacobianOplusXi ( 0,2 ) = y;
+    // // 对平移部分的导数
+    // _jacobianOplusXi ( 0,3 ) = -1;
+    // _jacobianOplusXi ( 0,4 ) = 0;
+    // _jacobianOplusXi ( 0,5 ) = 0;
 
-    _jacobianOplusXi ( 2,0 ) = -y;
-    _jacobianOplusXi ( 2,1 ) = x;
-    _jacobianOplusXi ( 2,2 ) = 0;
-    _jacobianOplusXi ( 2,3 ) = 0;
-    _jacobianOplusXi ( 2,4 ) = 0;
-    _jacobianOplusXi ( 2,5 ) = -1;
+    // _jacobianOplusXi ( 1,0 ) = z;
+    // _jacobianOplusXi ( 1,1 ) = 0;
+    // _jacobianOplusXi ( 1,2 ) = -x;
+    // _jacobianOplusXi ( 1,3 ) = 0;
+    // _jacobianOplusXi ( 1,4 ) = -1;
+    // _jacobianOplusXi ( 1,5 ) = 0;
+
+    // _jacobianOplusXi ( 2,0 ) = -y;
+    // _jacobianOplusXi ( 2,1 ) = x;
+    // _jacobianOplusXi ( 2,2 ) = 0;
+    // _jacobianOplusXi ( 2,3 ) = 0;
+    // _jacobianOplusXi ( 2,4 ) = 0;
+    // _jacobianOplusXi ( 2,5 ) = -1;
 }
 
 /**
